@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - '3000:3000'
+    depends_on:
+      - mysql
+    environment:
+      - PORT=3000
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USERNAME=root
+      - DB_PASSWORD=password
+      - DB_DATABASE=sales_db
+      - JWT_SECRET=your_jwt_secret_key
+      - JWT_EXPIRES_IN=15m
+      - JWT_REFRESH_SECRET=your_refresh_token_secret
+      - JWT_REFRESH_EXPIRES_IN=7d
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - '3306:3306'
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=sales_db
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:

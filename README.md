@@ -96,3 +96,153 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+# Students API
+
+API quản lý học sinh và đơn hàng xây dựng trên NestJS, TypeORM và MySQL.
+
+## Cài đặt và chạy ứng dụng
+
+### Yêu cầu hệ thống
+
+- Node.js (>= 18.x)
+- npm hoặc yarn
+- MySQL (>= 8.0)
+
+### Cài đặt cục bộ (Local)
+
+1. Clone repository:
+
+```bash
+git clone <repository-url>
+cd students-api
+```
+
+2. Cài đặt dependencies:
+
+```bash
+npm install
+```
+
+3. Tạo file .env từ file .env.example và cập nhật các thông số:
+
+```bash
+cp .env.example .env
+```
+
+4. Cấu hình cơ sở dữ liệu MySQL với thông tin trong file .env
+
+5. Chạy ứng dụng ở chế độ development:
+
+```bash
+npm run start:dev
+```
+
+6. Truy cập Swagger UI để xem tài liệu API:
+
+```
+http://localhost:3000/api
+```
+
+### Triển khai lên server
+
+#### Cách 1: Sử dụng Render.com
+
+1. Tạo tài khoản trên [Render.com](https://render.com/)
+
+2. Tạo Web Service mới:
+
+   - Liên kết với repository Git
+   - Chọn "Node" làm runtime
+   - Build Command: `npm install && npm run build`
+   - Start Command: `npm run start:prod`
+
+3. Thêm Environment Variables:
+
+   - Thêm tất cả biến trong file `.env.example` với giá trị thực
+
+4. Cấu hình Database:
+   - Tạo MySQL Database trên Render hoặc sử dụng dịch vụ bên ngoài như AWS RDS, DigitalOcean
+   - Cập nhật thông tin kết nối trong Environment Variables
+
+#### Cách 2: Sử dụng Docker và VPS (như DigitalOcean, AWS EC2)
+
+1. Tạo Dockerfile:
+
+```dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+EXPOSE 3000
+
+CMD ["npm", "run", "start:prod"]
+```
+
+2. Tạo docker-compose.yml:
+
+```yaml
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - '3000:3000'
+    depends_on:
+      - mysql
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USERNAME=root
+      - DB_PASSWORD=password
+      - DB_DATABASE=sales_db
+      - JWT_SECRET=your_jwt_secret_key
+      - JWT_EXPIRES_IN=15m
+      - JWT_REFRESH_SECRET=your_refresh_token_secret
+      - JWT_REFRESH_EXPIRES_IN=7d
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - '3306:3306'
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=sales_db
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:
+```
+
+3. Triển khai lên VPS:
+   - Cài đặt Docker và Docker Compose trên server
+   - Upload code lên server
+   - Chạy lệnh: `docker-compose up -d`
+
+## Sử dụng API
+
+1. Đăng ký tài khoản: `POST /auth/signup`
+2. Đăng nhập: `POST /auth/login`
+3. Sử dụng access_token trong header Authorization: `Bearer {access_token}`
+4. Khi token hết hạn, gọi API refresh token: `POST /auth/refresh` với body chứa refresh_token
+
+## Testing
+
+1. Để gọi các API bảo mật, cần đăng nhập trước để lấy token
+2. Trong Swagger UI:
+   - Đăng nhập qua endpoint `/auth/login`
+   - Dùng token nhận được trong phần Authorize (Nút "Authorize" ở đầu trang)
+   - Nhập: `Bearer {access_token}` (nhớ thêm từ "Bearer" và khoảng trắng)
+
+## Lưu ý về CORS
+
+API đã được cấu hình để cho phép cross-origin requests từ bất kỳ domain nào. Trong môi trường production, nên giới hạn origins cho phù hợp trong file `src/main.ts`.
